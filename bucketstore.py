@@ -144,11 +144,14 @@ class S3Key:
 class S3Bucket:
     """An Amazon S3 Bucket."""
 
-    def __init__(self, name: str, create: bool = False, region: str = "") -> None:
+    def __init__(self, name: str, create: bool = False, region: str = "", endpoint_url: str = None) -> None:
         super(S3Bucket, self).__init__()
         self.name = name
         self.region = region or os.getenv("AWS_DEFAULT_REGION", AWS_DEFAULT_REGION)
-        self._boto_s3 = boto3.resource("s3", self.region)
+        if endpoint_url is not None:
+            self._boto_s3 = boto3.resource("s3", self.region, endpoint_url=endpoint_url)
+        else:
+            self._boto_s3 = boto3.resource("s3", self.region)
         self._boto_bucket = self._boto_s3.Bucket(self.name)
 
         # Check if the bucket exists.
@@ -249,9 +252,9 @@ def list() -> List[str]:  # pylint: disable=redefined-builtin
     return [bucket.name for bucket in s3_resource.buckets.all()]
 
 
-def get(bucket_name: str, create: bool = False) -> S3Bucket:
+def get(bucket_name: str, create: bool = False, endpoint_url: str = None) -> S3Bucket:
     """get an s3bucket object by name"""
-    return S3Bucket(bucket_name, create=create)
+    return S3Bucket(bucket_name, create=create, endpoint_url=endpoint_url)
 
 
 def login(
