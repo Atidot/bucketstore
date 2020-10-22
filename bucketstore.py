@@ -251,7 +251,6 @@ def list() -> List[str]:  # pylint: disable=redefined-builtin
     s3_resource = boto3.resource("s3")
     return [bucket.name for bucket in s3_resource.buckets.all()]
 
-config=botocore.config.Config(s3={'addressing_style':'path'}))
 
 def get(bucket_name: str, create: bool = False, endpoint_url: str = None, config: botocore.config.Config = None) -> S3Bucket:
     """get an s3bucket object by name"""
