@@ -144,12 +144,12 @@ class S3Key:
 class S3Bucket:
     """An Amazon S3 Bucket."""
 
-    def __init__(self, name: str, create: bool = False, region: str = "", endpoint_url: str = None) -> None:
+    def __init__(self, name: str, create: bool = False, region: str = "", endpoint_url: str = None, config: botocore.config.Config = None) -> None:
         super(S3Bucket, self).__init__()
         self.name = name
         self.region = region or os.getenv("AWS_DEFAULT_REGION", AWS_DEFAULT_REGION)
         if endpoint_url is not None:
-            self._boto_s3 = boto3.resource("s3", self.region, endpoint_url=endpoint_url)
+            self._boto_s3 = boto3.resource("s3", self.region, endpoint_url=endpoint_url, config=config)
         else:
             self._boto_s3 = boto3.resource("s3", self.region)
         self._boto_bucket = self._boto_s3.Bucket(self.name)
@@ -251,10 +251,11 @@ def list() -> List[str]:  # pylint: disable=redefined-builtin
     s3_resource = boto3.resource("s3")
     return [bucket.name for bucket in s3_resource.buckets.all()]
 
+config=botocore.config.Config(s3={'addressing_style':'path'}))
 
-def get(bucket_name: str, create: bool = False, endpoint_url: str = None) -> S3Bucket:
+def get(bucket_name: str, create: bool = False, endpoint_url: str = None, config: botocore.config.Config = None) -> S3Bucket:
     """get an s3bucket object by name"""
-    return S3Bucket(bucket_name, create=create, endpoint_url=endpoint_url)
+    return S3Bucket(bucket_name, create=create, endpoint_url=endpoint_url, config=config)
 
 
 def login(
