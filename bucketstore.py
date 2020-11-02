@@ -155,9 +155,17 @@ class S3Bucket:
         self._boto_bucket = self._boto_s3.Bucket(self.name)
 
         # Check if the bucket exists.
-        if not self._boto_s3.Bucket(self.name) in self._boto_s3.buckets.all():
-            if create:
-                # Create the bucket.
+        try:
+            self._boto_s3.head_bucket(Bucket=self.name):
+        except botocore.exceptions.ClientError as e:
+            status_code = str(e.response['ResponseMetadata']['HTTPStatusCode'])
+            if status_code not in ['404', '403']:
+                raise e
+            elif status_code == '403':
+                raise ValueError('You are forbidden access to bucket {0!r}'.format(self.name))
+            # At this point we know status_code == 404, so we may have
+            # an opportunity to create the non-existing bucket.
+            elif create:
                 self._boto_s3.create_bucket(Bucket=self.name)
             else:
                 raise ValueError("The bucket {0!r} doesn't exist!".format(self.name))
