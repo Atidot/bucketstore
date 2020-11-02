@@ -156,7 +156,7 @@ class S3Bucket:
 
         # Check if the bucket exists.
         try:
-            self._boto_s3.head_bucket(Bucket=self.name):
+            self._boto_s3.head_bucket(Bucket=self.name)
         except botocore.exceptions.ClientError as e:
             status_code = str(e.response['ResponseMetadata']['HTTPStatusCode'])
             if status_code not in ['404', '403']:
